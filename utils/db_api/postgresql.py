@@ -124,3 +124,12 @@ class Database:
     async def create_comment_mark(self, department_id, branch_id, employee_id, user_id, mark, message):
         sql = "INSERT INTO Fikr (department_id, branch_id, employee_id, user_id, mark, message) VALUES($1, $2, $3, $4, $5, $6) returning *"
         return await self.execute(sql, department_id, branch_id, employee_id, user_id, mark, message, fetchrow=True)
+
+    async def select_comment(self, user_id, employee_id, department_id):
+        sql = "SELECT * FROM Fikr WHERE user_id=$1 AND employee_id=$2 AND department_id=$3"
+        return await self.execute(sql, user_id, employee_id, department_id, fetch=True)
+
+    # for promo codes
+    async def create_promo_code(self, promo_code, user_id):
+        sql = "INSERT INTO Promocodes (promocode, user_id) VALUES($1, $2) returning *"
+        return await self.execute(sql, promo_code, user_id, fetchrow=True)

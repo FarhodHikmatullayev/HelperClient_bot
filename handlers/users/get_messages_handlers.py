@@ -1,6 +1,7 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+from keyboards.default.menu import back_menu_keyboard
 from keyboards.inline.confirmation import confirm_keyboard
 from keyboards.inline.departments_keyboard import departments_keyboard, department_callback_data
 from keyboards.inline.employee_or_department import check_markup, department_or_employee_callback_data
@@ -162,27 +163,41 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
     grade = int(data.get('grade'))
     user_id = int(data.get('user_id'))
     branch_id = int(data.get('branch_id'))
-    mark_comment = await db.create_comment_mark(
-        department_id=department_id,
-        branch_id=branch_id,
-        employee_id=employee_id,
-        user_id=user_id,
-        mark=grade,
-        message=comment
-    )
-    text = "Siz baholash jarayonidan muvaffaqiyatli o'tdingiz"
-    await call.message.edit_text(text=text)
-    promocode = await create_promocode()
 
-    text = f"Tabriklaymiz! Siz yordamchi mijoz o'yini ishtirokchisiga aylandingiz\n" \
-           f"Sizning promocodingiz '{promocode}'"
-    await call.message.answer(text=text)
+    marks = await db.select_comment(user_id=user_id, department_id=department_id, employee_id=employee_id)
+    if marks:
+        text = "Siz ilgari bu obektga fikr bildirgansiz\n" \
+               "Boshqa obektlarga fikr bildirib ko'ring"
+        await state.finish()
+        await call.message.answer(text=text, reply_markup=back_menu_keyboard)
+        await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+
+
+    else:
+        mark_comment = await db.create_comment_mark(
+            department_id=department_id,
+            branch_id=branch_id,
+            employee_id=employee_id,
+            user_id=user_id,
+            mark=grade,
+            message=comment
+        )
+        text = "Siz baholash jarayonidan muvaffaqiyatli o'tdingiz"
+        await call.message.edit_text(text=text)
+        promocode = await create_promocode()
+
+        user_promo_code = await db.create_promo_code(promo_code=promocode, user_id=user_id)
+
+        text = f"Tabriklaymiz! Siz yordamchi mijoz o'yini ishtirokchisiga aylandingiz\n" \
+               f"Sizning promocodingiz '{promocode}'"
+        await state.finish()
+        await call.message.answer(text=text, reply_markup=back_menu_keyboard)
 
 
 @dp.callback_query_handler(state=Mark.comment, text='cancel')
 async def cancel_confirmation_mark(call: CallbackQuery, state: FSMContext):
     # await call.message.answer("Siz saqlashni rad etdingiz", reply_markup=back_menu_keyboard)
-    await call.message.answer("Siz saqlashni rad etdingiz")
+    await call.message.answer("Siz saqlashni rad etdingiz", reply_markup=back_menu_keyboard)
 
     await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     await state.finish()

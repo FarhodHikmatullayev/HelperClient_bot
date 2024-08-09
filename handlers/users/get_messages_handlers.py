@@ -1,6 +1,6 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
-
+import datetime
 from keyboards.default.menu import back_menu_keyboard
 from keyboards.inline.confirmation import confirm_keyboard
 from keyboards.inline.departments_keyboard import departments_keyboard, department_callback_data
@@ -27,7 +27,7 @@ async def set_departments(call: CallbackQuery, callback_data: dict):
     for dep_fil in department_filial:
         department_id = dep_fil['department_id']
         departments_id.append(department_id)
-    text = "Bo'limlar ro'yxati\n" \
+    text = "Lavozimlar ro'yxati\n" \
            "Baho berish uchun ulardan birini tanlang"
     markup = await departments_keyboard(departments_id, branch_id=branch_id)
     await call.message.edit_text(text=text, reply_markup=markup)
@@ -38,7 +38,7 @@ async def set_employee_or_department(call: CallbackQuery, callback_data: dict):
     department_id = int(callback_data.get('id'))
     branch_id = int(callback_data.get("branch_id"))
     markup = await check_markup(department_id=department_id, branch_id=branch_id)
-    text = "Bo'limga baho berasizmi yoki xodimga"
+    text = "Mahsulotga baho berasizmi yoki xodimga"
     await call.message.edit_text(text=text, reply_markup=markup)
 
 
@@ -62,11 +62,11 @@ async def for_employee_or_department(call: CallbackQuery, callback_data: dict, s
         }
     )
     if department_employee == 'employee':
-        text = 'Xodimning raqamini kiriting'
+        text = 'Xodimning ID raqamini kiriting'
         await call.message.edit_text(text=text)
         await Mark.employee_id.set()
     elif department_employee == 'department':
-        text = 'Baho bering'
+        text = 'Mahsulotga baho bering\n'
         await call.message.edit_text(text=text, reply_markup=marks_keyboard)
         await Mark.grade.set()
 
@@ -74,10 +74,23 @@ async def for_employee_or_department(call: CallbackQuery, callback_data: dict, s
 @dp.message_handler(state=Mark.employee_id)
 async def get_employee_id(message: Message, state: FSMContext):
     employee_id = message.text
+    print('employee_code', employee_id)
+    data = await state.get_data()
+    branch_id = data.get('branch_id')
+    department_id = data.get('department_id')
+    print('filial_id', branch_id)
+    print('department_id', department_id)
+    print('type', type(department_id))
     try:
+        print(1)
         employee_id = int(employee_id)
-        if employee_id:
+        print(2)
+        employees = await db.select_employee(code=str(employee_id), filial_id=int(branch_id),
+                                             department_id=int(department_id))
+        print(3)
 
+        if employees:
+            print(4)
             # if xodimlar listidan id ni qidirish amali
 
             await state.update_data(
@@ -89,17 +102,18 @@ async def get_employee_id(message: Message, state: FSMContext):
             await message.answer(text=text, reply_markup=marks_keyboard)
             await Mark.grade.set()
         else:
-            text = "Bunday xodim topilmadi,\n" \
-                   "Iltimos xodimning raqamini tog'ri kiriting"
+            print(5)
+            text = f"Bu filialda bunday lavozimdagi ID raqami {employee_id} bo'lgan xodim mavjud emas\n" \
+                   f"Iltimos xodimning raqamini tog'ri kiriting\n"
             await message.answer(text=text)
             await Mark.employee_id.set()
 
     except:
         text = "Xodim ID raqamini notog'ri kiritdingiz\n" \
+               "Yoki bunday xodim mavjud emas\n" \
                "Iltimos, uni tog'ri kiriting"
         await message.answer(text=text)
         await Mark.employee_id.set()
-    print('text', text)
 
 
 @dp.callback_query_handler(mark_callback_data.filter(), state=Mark.grade)
@@ -110,7 +124,15 @@ async def get_mark(call: CallbackQuery, callback_data: dict, state: FSMContext):
             'grade': mark
         }
     )
-    text = "Nega bunday ball berganingizga izoh yozing"
+    data = await state.get_data()
+    employee_id = data.get('employee_id', None)
+    if not employee_id:
+        text = "Nega bunday ball berganingizga izoh yozing\n" \
+               "Masalan: \n" \
+               "1. Men izlagan mahsulot yo'q ekan\n" \
+               "2. 'mahsulot nomi' ning yaroqlilik muddati tugabdi"
+    else:
+        text = "Nega bunday ball berganingizga izoh yozing"
     await call.message.edit_text(text=text)
     await Mark.comment.set()
 
@@ -164,9 +186,19 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
     user_id = int(data.get('user_id'))
     branch_id = int(data.get('branch_id'))
 
-    marks = await db.select_comment(user_id=user_id, department_id=department_id, employee_id=employee_id)
-    if marks:
-        text = "Siz ilgari bu obektga fikr bildirgansiz\n" \
+    if employee_id:
+        marks = await db.select_comment(user_id=user_id, department_id=department_id, employee_code=employee_id,
+                                        branch_id=branch_id)
+    else:
+        marks = await db.select_comments(user_id=user_id, department_id=department_id, branch_id=branch_id)
+    today = datetime.date.today()
+    print(today)
+    if marks and marks[0]['created_at'].date() == today:
+        mark = marks[0]
+        time = mark['created_at']
+        date = time.date()
+        print(date == today)
+        text = "Siz bugun bu obektga fikr bildirgansiz\n" \
                "Boshqa obektlarga fikr bildirib ko'ring"
         await state.finish()
         await call.message.answer(text=text, reply_markup=back_menu_keyboard)
@@ -177,11 +209,12 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
         mark_comment = await db.create_comment_mark(
             department_id=department_id,
             branch_id=branch_id,
-            employee_id=employee_id,
+            employee_code=employee_id,
             user_id=user_id,
             mark=grade,
             message=comment
         )
+        print("Saqlangan employee code", employee_id)
         text = "Siz baholash jarayonidan muvaffaqiyatli o'tdingiz"
         await call.message.edit_text(text=text)
         promocode = await create_promocode()

@@ -48,9 +48,9 @@ class Database:
         return sql, tuple(parameters.values())
 
     # for users
-    async def create_user(self, phone, username, telegram_id):
-        sql = "INSERT INTO Users (phone, username, telegram_id) VALUES($1, $2, $3) returning *"
-        return await self.execute(sql, phone, username, telegram_id, fetchrow=True)
+    async def create_user(self, phone, username, full_name, telegram_id):
+        sql = "INSERT INTO Users (phone, username, full_name, telegram_id) VALUES($1, $2, $3, $4) returning *"
+        return await self.execute(sql, phone, username, full_name, telegram_id, fetchrow=True)
 
     async def select_user(self, **kwargs):
         sql = "SELECT * FROM Users WHERE "
@@ -116,20 +116,82 @@ class Database:
         sql, parameters = self.format_args(sql, parameters=kwargs)
         return await self.execute(sql, *parameters, fetch=True)
 
+    async def create_department_filial(self, department_id, filial_id):
+        sql = "INSERT INTO Department_Filial (department_id, filial_id) VALUES($1, $2) returning *"
+        return await self.execute(sql, department_id, filial_id, fetchrow=True)
+
     # for comments
-    async def create_comment(self, message, user_id, mark):
-        sql = "INSERT INTO Filial (message, user_id, mark) VALUES($1) returning *"
+    async def create_comment(self, message, user_id, mark, department_id, branch_id, employee_code):
+        sql = "INSERT INTO Fikr (message, user_id, mark) VALUES($1) returning *"
         return await self.execute(sql, message, user_id, mark, fetchrow=True)
 
-    async def create_comment_mark(self, department_id, branch_id, employee_id, user_id, mark, message):
-        sql = "INSERT INTO Fikr (department_id, branch_id, employee_id, user_id, mark, message) VALUES($1, $2, $3, $4, $5, $6) returning *"
-        return await self.execute(sql, department_id, branch_id, employee_id, user_id, mark, message, fetchrow=True)
+    async def create_comment_mark(self, department_id, branch_id, employee_code, user_id, mark, message):
+        sql = "INSERT INTO Fikr (department_id, branch_id, employee_code, user_id, mark, message) VALUES($1, $2, $3, $4, $5, $6) returning *"
+        return await self.execute(sql, department_id, branch_id, employee_code, user_id, mark, message, fetchrow=True)
 
-    async def select_comment(self, user_id, employee_id, department_id):
-        sql = "SELECT * FROM Fikr WHERE user_id=$1 AND employee_id=$2 AND department_id=$3"
-        return await self.execute(sql, user_id, employee_id, department_id, fetch=True)
+    async def select_comment(self, user_id, employee_code, department_id, branch_id):
+        sql = "SELECT * FROM Fikr WHERE user_id=$1 AND employee_code=$2 AND department_id=$3 AND branch_id=$4"
+        return await self.execute(sql, user_id, employee_code, department_id, branch_id, fetch=True)
+
+    async def select_all_comments(self):
+        sql = "SELECT * FROM Fikr"
+        return await self.execute(sql, fetch=True)
+
+    async def select_comments(self, **kwargs):
+        sql = "SELECT * FROM Fikr WHERE "
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetch=True)
 
     # for promo codes
     async def create_promo_code(self, promo_code, user_id):
         sql = "INSERT INTO Promocodes (promocode, user_id) VALUES($1, $2) returning *"
         return await self.execute(sql, promo_code, user_id, fetchrow=True)
+
+    async def select_all_promo_codes(self):
+        sql = "SELECT * FROM Promocodes"
+        return await self.execute(sql, fetch=True)
+
+    async def delete_all_promocodes(self):
+        sql = "DELETE FROM Promocodes"
+        return await self.execute(sql, execute=True)
+
+    # for employees
+    async def create_employee(self, full_name, department_id, filial_id, code):
+        sql = "INSERT INTO Employee (full_name, department_id, filial_id, code) VALUES($1, $2, $3, $4) RETURNING *"
+        return await self.execute(sql, full_name, department_id, filial_id, code, fetchrow=True)
+
+    async def update_employee(self, id, full_name=None, department_id=None, filial_id=None, code=None):
+        sql = "UPDATE Employee SET "
+        parameters = {}
+        if full_name is not None:
+            sql += "full_name=$1, "
+            parameters["full_name"] = full_name
+        if department_id is not None:
+            sql += "department_id=$2, "
+            parameters["department_id"] = department_id
+        if filial_id is not None:
+            sql += "filial_id=$3, "
+            parameters["filial_id"] = filial_id
+        if code is not None:
+            sql += "code=$4, "
+            parameters["code"] = code
+        sql = sql.rstrip(", ") + " WHERE id=$5 RETURNING *"
+        parameters["id"] = id
+        return await self.execute(sql, *parameters.values(), fetchrow=True)
+
+    async def delete_all_employees(self):
+        sql = "DELETE FROM Employee"
+        return await self.execute(sql, execute=True)
+
+    async def delete_employee(self, id):
+        sql = "DELETE FROM Employee WHERE id=$1 RETURNING *"
+        return await self.execute(sql, id, fetchrow=True)
+
+    async def select_employee(self, **kwargs):
+        sql = "SELECT * FROM employee WHERE "
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetch=True)
+
+    async def select_all_employees(self):
+        sql = "SELECT * FROM Employee"
+        return await self.execute(sql, fetch=True)

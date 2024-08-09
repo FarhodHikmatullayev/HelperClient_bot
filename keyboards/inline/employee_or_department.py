@@ -9,7 +9,7 @@ async def check_markup(department_id, branch_id):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Xodim",
+                    text="Xizmat ko'rsatishga (Xodimga)",
                     callback_data=department_or_employee_callback_data.new(
                         department_or_employee='employee',
                         department_id=department_id,
@@ -17,7 +17,7 @@ async def check_markup(department_id, branch_id):
                     )
                 ),
                 InlineKeyboardButton(
-                    text="Bo'lim",
+                    text="Mahsulotga",
                     callback_data=department_or_employee_callback_data.new(
                         department_or_employee='department',
                         department_id=department_id,

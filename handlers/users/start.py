@@ -15,9 +15,10 @@ from loader import dp
 @dp.message_handler(content_types='contact')
 async def get_contact(message: Message):
     contact = message.contact
+    print('full_name', message.from_user.full_name)
     try:
         user = await db.create_user(phone=contact.phone_number, telegram_id=message.from_user.id,
-                                    username=message.from_user.username)
+                                    username=message.from_user.username, full_name=message.from_user.full_name)
         await message.answer(f"Rahmat, <b>{contact.full_name}</b>.\n"
                              f"Sizning {contact.phone_number} raqamingizni qabul qildik.",
                              reply_markup=ReplyKeyboardRemove())

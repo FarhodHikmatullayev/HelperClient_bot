@@ -13,6 +13,7 @@ from loader import dp, db, bot
 
 @dp.message_handler(Command('operate_random'), user_id=SUPERADMINS, state='*')
 async def begin_random(message: types.Message, state: FSMContext):
+    await state.finish()
     # download promocodes
     temp_dir = await download_all_promo_codes()
 

@@ -2,6 +2,7 @@ import tempfile
 from typing import Union
 
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 import openpyxl
@@ -54,7 +55,8 @@ async def download_all_employees_function():
 
 
 @dp.message_handler(Command('download_employees'), user_id=ADMINS, state='*')
-async def download_emp(message: Message):
+async def download_emp(message: Message, state: FSMContext):
+    await state.finish()
     temp_dir = await download_all_employees_function()
 
     with open(os.path.join(temp_dir, 'Employees_data.xlsx'), 'rb') as file:
@@ -65,6 +67,7 @@ async def download_emp(message: Message):
 
 
 @dp.message_handler(Command('download_employees'), state='*')
-async def download_emp(message: Message):
+async def download_emp(message: Message, state: FSMContext):
+    await state.finish()
     text = "Bu komanda faqat adminlar uchun"
     await message.answer(text=text, reply_markup=back_menu_keyboard)

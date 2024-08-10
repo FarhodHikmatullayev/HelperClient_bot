@@ -14,14 +14,16 @@ from states.add_employee import AddEmployeeState
 
 
 @dp.message_handler(Command('upload_employees'), user_id=ADMINS, state='*')
-async def get_employees_excel_file(message: types.Message):
+async def get_employees_excel_file(message: types.Message, state: FSMContext):
+    await state.finish()
     text = "Xodimlar jadvalini yuboring (Excel)"
     await message.answer(text=text)
     await AddEmployeeState.waiting_for_excel_file.set()
 
 
 @dp.message_handler(Command('upload_employees'), state='*')
-async def get_employees_excel_file(message: types.Message):
+async def get_employees_excel_file(message: types.Message, state: FSMContext):
+    await state.finish()
     text = "Bu komanda faqat adminlar uchun"
     await message.answer(text=text, reply_markup=back_menu_keyboard)
 

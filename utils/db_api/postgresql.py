@@ -125,9 +125,10 @@ class Database:
         sql = "INSERT INTO Fikr (message, user_id, mark) VALUES($1) returning *"
         return await self.execute(sql, message, user_id, mark, fetchrow=True)
 
-    async def create_comment_mark(self, department_id, branch_id, employee_code, user_id, mark, message):
-        sql = "INSERT INTO Fikr (department_id, branch_id, employee_code, user_id, mark, message) VALUES($1, $2, $3, $4, $5, $6) returning *"
-        return await self.execute(sql, department_id, branch_id, employee_code, user_id, mark, message, fetchrow=True)
+    async def create_comment_mark(self, department_id, branch_id, employee_code, user_id, mark, created_at, message):
+        sql = "INSERT INTO Fikr (department_id, branch_id, employee_code, user_id, mark, message, created_at) VALUES($1, $2, $3, $4, $5, $6, $7) returning *"
+        return await self.execute(sql, department_id, branch_id, employee_code, user_id, mark, message, created_at,
+                                  fetchrow=True)
 
     async def select_comment(self, user_id, employee_code, department_id, branch_id):
         sql = "SELECT * FROM Fikr WHERE user_id=$1 AND employee_code=$2 AND department_id=$3 AND branch_id=$4"
@@ -142,10 +143,14 @@ class Database:
         sql, parameters = self.format_args(sql, parameters=kwargs)
         return await self.execute(sql, *parameters, fetch=True)
 
+    async def select_fikr_with_null_employee_code(self, user_id, department_id, branch_id):
+        sql = "SELECT * FROM fikr WHERE employee_code IS NULL and user_id = $1 and department_id = $2 and branch_id = $3"
+        return await self.execute(sql, user_id, department_id, branch_id, fetch=True)
+
     # for promo codes
-    async def create_promo_code(self, promo_code, user_id):
-        sql = "INSERT INTO Promocodes (promocode, user_id) VALUES($1, $2) returning *"
-        return await self.execute(sql, promo_code, user_id, fetchrow=True)
+    async def create_promo_code(self, promo_code, user_id, created_at):
+        sql = "INSERT INTO Promocodes (promocode, user_id, created_at) VALUES($1, $2, $3) returning *"
+        return await self.execute(sql, promo_code, user_id, created_at, fetchrow=True)
 
     async def select_all_promo_codes(self):
         sql = "SELECT * FROM Promocodes"

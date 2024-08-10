@@ -2,6 +2,7 @@ import tempfile
 from typing import Union
 
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 import openpyxl
@@ -23,6 +24,7 @@ async def download_all_promo_codes():
     worksheet['D1'] = 'USERNAME'
     worksheet['E1'] = 'PHONE'
     worksheet['F1'] = 'TELEGRAM ID'
+    worksheet['G1'] = 'TIME'
 
     worksheet.cell(row=1, column=1, value='№')
     worksheet.cell(row=1, column=2, value='PROMOCODE')
@@ -30,6 +32,7 @@ async def download_all_promo_codes():
     worksheet.cell(row=1, column=4, value="USERNAME")
     worksheet.cell(row=1, column=5, value='PHONE')
     worksheet.cell(row=1, column=6, value='TELEGRAM ID')
+    worksheet.cell(row=1, column=7, value='TIME')
     tr = 0
     for row, promo_code in enumerate(promo_codes, start=2):
         user_id = promo_code['user_id']
@@ -49,6 +52,7 @@ async def download_all_promo_codes():
         worksheet.cell(row=row, column=4, value=username)
         worksheet.cell(row=row, column=5, value=phone)
         worksheet.cell(row=row, column=6, value=telegram_id)
+        worksheet.cell(row=row, column=7, value=str(promo_code['created_at']))
 
     temp_dir = tempfile.gettempdir()
     file_path = os.path.join(temp_dir, 'Promo_codes_data.xlsx')
@@ -58,7 +62,8 @@ async def download_all_promo_codes():
 
 
 @dp.message_handler(Command('download_all_promo_codes'), user_id=ADMINS, state='*')
-async def download_promo(message: Message):
+async def download_promo(message: Message, state: FSMContext):
+    await state.finish()
     temp_dir = await download_all_promo_codes()
 
     with open(os.path.join(temp_dir, 'Promo_codes_data.xlsx'), 'rb') as file:
@@ -69,6 +74,7 @@ async def download_promo(message: Message):
 
 
 @dp.message_handler(Command('download_all_promo_codes'), state='*')
-async def download_promo(message: Message):
+async def download_promo(message: Message, state: FSMContext):
+    await state.finish()
     text = "Bu komanda faqat adminlar uchun"
     await message.answer(text=text, reply_markup=back_menu_keyboard)

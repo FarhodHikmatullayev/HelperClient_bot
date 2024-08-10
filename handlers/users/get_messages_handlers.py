@@ -1,6 +1,7 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 import datetime
+
 from keyboards.default.menu import back_menu_keyboard
 from keyboards.inline.confirmation import confirm_keyboard
 from keyboards.inline.departments_keyboard import departments_keyboard, department_callback_data
@@ -186,13 +187,24 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
     user_id = int(data.get('user_id'))
     branch_id = int(data.get('branch_id'))
 
+    print('employee_id', employee_id)
+
     if employee_id:
         marks = await db.select_comment(user_id=user_id, department_id=department_id, employee_code=employee_id,
                                         branch_id=branch_id)
     else:
-        marks = await db.select_comments(user_id=user_id, department_id=department_id, branch_id=branch_id)
+        marks = await db.select_fikr_with_null_employee_code(
+            user_id=user_id,
+            department_id=department_id,
+            branch_id=branch_id,
+        )
     today = datetime.date.today()
     print(today)
+    print('marks', marks)
+    try:
+        print('marks[0]', marks[0])
+    except:
+        pass
     if marks and marks[0]['created_at'].date() == today:
         mark = marks[0]
         time = mark['created_at']
@@ -212,14 +224,16 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
             employee_code=employee_id,
             user_id=user_id,
             mark=grade,
-            message=comment
+            message=comment,
+            created_at=datetime.datetime.now()
         )
         print("Saqlangan employee code", employee_id)
         text = "Siz baholash jarayonidan muvaffaqiyatli o'tdingiz"
         await call.message.edit_text(text=text)
         promocode = await create_promocode()
 
-        user_promo_code = await db.create_promo_code(promo_code=promocode, user_id=user_id)
+        user_promo_code = await db.create_promo_code(promo_code=promocode, user_id=user_id,
+                                                     created_at=datetime.datetime.now())
 
         text = f"Tabriklaymiz! Siz yordamchi mijoz o'yini ishtirokchisiga aylandingiz\n" \
                f"Sizning promocodingiz '{promocode}'"

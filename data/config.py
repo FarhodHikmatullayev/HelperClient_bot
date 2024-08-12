@@ -16,10 +16,11 @@ ADMINS = os.getenv("ADMINS")  # adminlar ro'yxati
 SUPERADMINS = os.getenv("SUPERADMINS")  # adminlar ro'yxati
 
 # IP = env.str("ip")  # Xosting ip manzili
-IP = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+IP = os.getenv("BOT_IP", "localhost")
 
 # for database
-DB_USER = env.str("DB_USER")
-DB_PASS = env.str("DB_PASS")
-DB_NAME = env.str("DB_NAME")
-DB_HOST = env.str("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST")
+# DB_HOST = env.str("DB_HOST")

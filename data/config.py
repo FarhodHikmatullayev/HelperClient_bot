@@ -8,7 +8,7 @@ env.read_env()
 BOT_TOKEN = env.str("BOT_TOKEN")  # Bot toekn
 ADMINS = env.list("ADMINS")  # adminlar ro'yxati
 SUPERADMINS = env.list("SUPERADMINS")  # adminlar ro'yxati
-IP = env.str("ip")  # Xosting ip manzili
+# IP = env.str("ip")  # Xosting ip manzili
 
 # DB_USER = env.str("DB_USER")
 # DB_PASS = env.str("DB_PASS")

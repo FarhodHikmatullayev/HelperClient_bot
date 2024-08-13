@@ -17,11 +17,11 @@ async def on_startup(dispatcher):
     # await on_startup_notify(dispatcher)
 
 
-#
 # if __name__ == '__main__':
 #     executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
 
-async def main():
+
+def main():
     # Oxirgi yangilanish ID raqamini olish
     update_offset = 0
 
@@ -36,9 +36,5 @@ async def main():
 
 
 if __name__ == '__main__':
-    async def run_app():
-        await executor.start_polling(dp, on_startup=on_startup)
-        await main()
-
-
-    run_app()
+    executor.start_polling(dp, on_startup=on_startup)
+    main()

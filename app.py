@@ -17,24 +17,26 @@ async def on_startup(dispatcher):
     # await on_startup_notify(dispatcher)
 
 
-# if __name__ == '__main__':
-#     executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
-
-
-def main():
-    # Oxirgi yangilanish ID raqamini olish
-    update_offset = 0
-
-    while True:
-        try:
-            updates = await dp.bot.get_updates(offset=update_offset, timeout=20)
-            if updates:
-                update_offset = updates[-1].update_id + 1
-                await dp.process_updates(updates)
-        except Exception as e:
-            print(f"Error: {e}")
-
-
 if __name__ == '__main__':
-    executor.start_polling(dp, on_startup=on_startup)
-    main()
+    executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
+
+
+# async def main():
+#     # Oxirgi yangilanish ID raqamini olish
+#     update_offset = 0
+#
+#     while True:
+#         try:
+#             updates = await dp.bot.get_updates(offset=update_offset, timeout=20)
+#             if updates:
+#                 update_offset = updates[-1].update_id + 1
+#                 await dp.process_updates(updates)
+#         except Exception as e:
+#             print(f"Error: {e}")
+#
+# if __name__ == '__main__':
+#     async def run_app():
+#         await executor.start_polling(dp, on_startup=on_startup)
+#         await main()
+#
+#     run_app()

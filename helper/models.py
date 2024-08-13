@@ -79,7 +79,7 @@ class Fikr(models.Model):
     department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True)
     employee_code = models.IntegerField(null=True)
     branch = models.ForeignKey('Filial', on_delete=models.CASCADE, null=True)
-    created_at = models.DateTimeField(default=timezone.now(), null=True)
+    created_at = models.DateTimeField(default=timezone.now, null=True)
 
     class Meta:
         db_table = 'fikr'

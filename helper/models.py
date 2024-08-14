@@ -14,6 +14,9 @@ class Users(models.Model):
     class Meta:
         db_table = 'users'
 
+    def __str__(self):
+        return self.full_name
+
 
 class Filial(models.Model):
     id = models.AutoField(primary_key=True)
@@ -21,6 +24,9 @@ class Filial(models.Model):
 
     class Meta:
         db_table = 'filial'
+
+    def __str__(self):
+        return self.name
 
 
 class Department(models.Model):
@@ -30,6 +36,9 @@ class Department(models.Model):
     class Meta:
         db_table = 'department'
 
+    def __str__(self):
+        return self.name
+
 
 class DepartmentFilial(models.Model):
     id = models.AutoField(primary_key=True)
@@ -38,6 +47,9 @@ class DepartmentFilial(models.Model):
 
     class Meta:
         db_table = 'department_filial'
+
+    def __str__(self):
+        return f"{self.filial.name} - {self.department.name}"
 
 
 class Employee(models.Model):
@@ -49,6 +61,9 @@ class Employee(models.Model):
 
     class Meta:
         db_table = 'employee'
+
+    def __str__(self):
+        return self.full_name
 
 
 # class Fikr(models.Model):
@@ -87,6 +102,9 @@ class Fikr(models.Model):
             models.CheckConstraint(check=models.Q(mark__gte=1) & models.Q(mark__lte=5), name='fikr_mark_check'),
         ]
 
+    def __str__(self):
+        return f"{self.user.full_name} ning {self.branch.name} filiali {self.department.name} lavozimidagi {self.employee_code} ID raqamli xodimga bildirgan fikri"
+
 
 class Promocode(models.Model):
     id = models.AutoField(primary_key=True)
@@ -96,3 +114,6 @@ class Promocode(models.Model):
 
     class Meta:
         db_table = 'promocodes'
+
+    def __str__(self):
+        return f"{self.user.full_name} ning {self.promocode} raqamli promocodi"

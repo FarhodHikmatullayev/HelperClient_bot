@@ -4,10 +4,15 @@ from loader import dp, db, bot
 import middlewares, filters, handlers
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
+from keep_alive import keep_alive
+from data.config import DEVELOPMENT_MODE
+
+if not DEVELOPMENT_MODE:
+    keep_alive()
 
 
 async def on_startup(dispatcher):
-    await set_webhook()
+    # await set_webhook()
     await db.create()
     # await db.drop_users()
 
@@ -18,9 +23,10 @@ async def on_startup(dispatcher):
     # await on_startup_notify(dispatcher)
 
 
-async def set_webhook():
-    webhook_url = f'https://helperclient-bot.onrender.com/webhook'
-    await bot.set_webhook(webhook_url)
+# this is for webhook
+# async def set_webhook():
+#     webhook_url = f'https://helperclient-bot.onrender.com/webhook'
+#     await bot.set_webhook(webhook_url)
 
 
 if __name__ == '__main__':

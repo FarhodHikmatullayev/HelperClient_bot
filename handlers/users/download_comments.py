@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 from typing import Union
 
@@ -68,7 +69,8 @@ async def download_all_comments_function():
         worksheet.cell(row=row, column=7, value=department_name)
         worksheet.cell(row=row, column=8, value=comment['employee_code'])
         worksheet.cell(row=row, column=9, value=comment['mark'])
-        worksheet.cell(row=row, column=10, value=str(comment['created_at']))
+        worksheet.cell(row=row, column=10,
+                       value=(comment['created_at'] + datetime.timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S'))
         worksheet.cell(row=row, column=11, value=comment['message'])
 
     temp_dir = tempfile.gettempdir()

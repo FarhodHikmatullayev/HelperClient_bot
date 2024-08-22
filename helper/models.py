@@ -13,6 +13,8 @@ class Users(models.Model):
 
     class Meta:
         db_table = 'users'
+        verbose_name = "User"
+        verbose_name_plural = "Foydalanuvchilar"
 
     def __str__(self):
         return self.full_name
@@ -24,6 +26,8 @@ class Filial(models.Model):
 
     class Meta:
         db_table = 'filial'
+        verbose_name = "Branch"
+        verbose_name_plural = "Filiallar"
 
     def __str__(self):
         return self.name
@@ -35,6 +39,8 @@ class Department(models.Model):
 
     class Meta:
         db_table = 'department'
+        verbose_name = "Rank"
+        verbose_name_plural = "Lavozimlar"
 
     def __str__(self):
         return self.name
@@ -47,6 +53,8 @@ class DepartmentFilial(models.Model):
 
     class Meta:
         db_table = 'department_filial'
+        verbose_name = "RankFilial"
+        verbose_name_plural = "Filial-Lavozim"
 
     def __str__(self):
         return f"{self.filial.name} - {self.department.name}"
@@ -61,6 +69,8 @@ class Employee(models.Model):
 
     class Meta:
         db_table = 'employee'
+        verbose_name = "Employee"
+        verbose_name_plural = "Xodimlar"
 
     def __str__(self):
         return self.full_name
@@ -101,6 +111,8 @@ class Fikr(models.Model):
         constraints = [
             models.CheckConstraint(check=models.Q(mark__gte=1) & models.Q(mark__lte=5), name='fikr_mark_check'),
         ]
+        verbose_name = "Comment"
+        verbose_name_plural = "Bildirilgan fikrlar"
 
     def __str__(self):
         return f"{self.user.full_name} ning {self.branch.name} filiali {self.department.name} lavozimidagi {self.employee_code} ID raqamli xodimga bildirgan fikri"
@@ -114,6 +126,8 @@ class Promocode(models.Model):
 
     class Meta:
         db_table = 'promocodes'
+        verbose_name = "Promo code"
+        verbose_name_plural = "Promo kodlar"
 
     def __str__(self):
         return f"{self.user.full_name} ning {self.promocode} raqamli promocodi"

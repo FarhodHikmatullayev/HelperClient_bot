@@ -38,7 +38,6 @@ async def begin_random(message: types.Message, state: FSMContext):
         random_code = random.choice(codes)
         selected_code = random_code['promocode']
         selected_user_id = random_code['user_id']
-        print('user_id_type', type(selected_user_id))
         user = await db.select_user(id=selected_user_id)
         try:
             user = user[0]

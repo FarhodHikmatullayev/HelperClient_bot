@@ -37,7 +37,6 @@ async def save_employees_from_excel(message: types.Message, state: FSMContext):
 
         await message.document.download(file_path)
         await db.delete_all_employees()
-        employees = await db.select_all_employees()
         try:
             # Load the Excel file
             workbook = load_workbook(file_path)

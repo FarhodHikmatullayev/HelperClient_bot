@@ -6,5 +6,6 @@ from . import download_employees
 from . import upload_employees
 from . import download_promocodes
 from . import download_comments
+from . import send_message_to_users
 from . import get_messages_handlers
 from . import echo

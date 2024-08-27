@@ -12,7 +12,7 @@ if not DEVELOPMENT_MODE:
 
 
 async def on_startup(dispatcher):
-    await bot.set_webhook(WEBHOOK_URL)
+    # await bot.set_webhook(WEBHOOK_URL)
     await db.create()
     # await db.drop_users()
 
@@ -30,9 +30,9 @@ async def on_startup(dispatcher):
 #     logging.warning('Bye!')
 
 
-WEBHOOK_HOST = 'https://helperclient-bot.onrender.com'  # 'https://rabid-owl-bot.onrender.com'  # Change this to your server URL
-WEBHOOK_PATH = f'/webhook/{BOT_TOKEN}'
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+# WEBHOOK_HOST = 'https://helperclient-bot.onrender.com'  # 'https://rabid-owl-bot.onrender.com'  # Change this to your server URL
+# WEBHOOK_PATH = f'/webhook/{BOT_TOKEN}'
+# WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 if __name__ == '__main__':
     executor.start_polling(dp, on_startup=on_startup)

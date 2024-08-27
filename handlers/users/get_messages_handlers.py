@@ -47,14 +47,11 @@ async def set_employee_or_department(call: CallbackQuery, callback_data: dict):
 async def for_employee_or_department(call: CallbackQuery, callback_data: dict, state: FSMContext):
     department_id = callback_data.get('department_id')
     branch_id = callback_data.get('branch_id')
-    print('callback_data', callback_data)
-    print("department_id", department_id)
 
     user_telegram_id = call.from_user.id
     users = await db.select_user(telegram_id=user_telegram_id)
     user_id = users[0]['id']
     department_employee = callback_data.get('department_or_employee')
-    print('department_employee', department_employee)
     await state.update_data(
         {
             'branch_id': branch_id,
@@ -75,23 +72,16 @@ async def for_employee_or_department(call: CallbackQuery, callback_data: dict, s
 @dp.message_handler(state=Mark.employee_id)
 async def get_employee_id(message: Message, state: FSMContext):
     employee_id = message.text
-    print('employee_code', employee_id)
     data = await state.get_data()
     branch_id = data.get('branch_id')
     department_id = data.get('department_id')
-    print('filial_id', branch_id)
-    print('department_id', department_id)
-    print('type', type(department_id))
+
     try:
-        print(1)
         employee_id = int(employee_id)
-        print(2)
         employees = await db.select_employee(code=str(employee_id), filial_id=int(branch_id),
                                              department_id=int(department_id))
-        print(3)
 
         if employees:
-            print(4)
             # if xodimlar listidan id ni qidirish amali
 
             await state.update_data(
@@ -103,7 +93,6 @@ async def get_employee_id(message: Message, state: FSMContext):
             await message.answer(text=text, reply_markup=marks_keyboard)
             await Mark.grade.set()
         else:
-            print(5)
             text = f"Bu filialda bunday lavozimdagi ID raqami {employee_id} bo'lgan xodim mavjud emas\n" \
                    f"Iltimos xodimning raqamini tog'ri kiriting\n"
             await message.answer(text=text)
@@ -187,8 +176,6 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
     user_id = int(data.get('user_id'))
     branch_id = int(data.get('branch_id'))
 
-    print('employee_id', employee_id)
-
     if employee_id:
         marks = await db.select_comment(user_id=user_id, department_id=department_id, employee_code=employee_id,
                                         branch_id=branch_id)
@@ -199,17 +186,11 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
             branch_id=branch_id,
         )
     today = datetime.date.today()
-    print(today)
-    print('marks', marks)
-    try:
-        print('marks[0]', marks[0])
-    except:
-        pass
+
     if marks and marks[0]['created_at'].date() == today:
         mark = marks[0]
         time = mark['created_at']
         date = time.date()
-        print(date == today)
         text = "Siz bugun bu obektga fikr bildirgansiz\n" \
                "Boshqa obektlarga fikr bildirib ko'ring"
         await state.finish()
@@ -227,7 +208,6 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
             message=comment,
             created_at=datetime.datetime.now()
         )
-        print("Saqlangan employee code", employee_id)
         text = "Siz baholash jarayonidan muvaffaqiyatli o'tdingiz"
         await call.message.edit_text(text=text)
         promocode = await create_promocode()

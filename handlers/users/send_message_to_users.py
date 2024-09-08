@@ -23,35 +23,53 @@ async def get_content(message: types.Message, state: FSMContext):
     content_type = message.content_type
     print('content_type', content_type)
     if content_type == 'photo':
+        print('photo', message.photo)
         photo = message.photo[-1]
-        text = await photo_link(photo)
+        # text = await photo_link(photo)
+        # await message.reply_photo(photo.file_id)
+        await state.update_data(
+            {
+                "image_id": photo.file_id
+            }
+        )
     elif content_type == 'video':
         video = message.video
-        text = await video_link(video)
+        # text = await video_link(video)
+        await state.update_data(
+            {
+                "video_id": video.file_id
+            }
+        )
     elif content_type == 'text':
-        text = message.text
+        await state.update_data(
+            {
+                "text": message.text
+            }
+        )
     else:
         text = "Siz Rasm, Text, Video jo'nata olasiz\n" \
                "Iltimos qayta urunib ko'ring va yuqoridagilardan birini jo'nating"
         await message.answer(text=text, reply_markup=back_menu_keyboard)
         return
 
-    await state.update_data(
-        {
-            "content": text
-        }
-    )
     await message.answer(text="Jo'natilsinmi?", reply_markup=confirm_keyboard)
 
 
 @dp.callback_query_handler(text='ok', state=SendMessageState.content)
 async def confirm_sending_message(call: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    content = data.get('content')
+    image_id = data.get('image_id')
+    video_id = data.get('video_id')
+    text = data.get('text')
 
     users = await db.select_all_users()
     for user in users:
-        await bot.send_message(chat_id=user['telegram_id'], text=content)
+        if image_id:
+            await bot.send_photo(chat_id=user['telegram_id'], photo=image_id)
+        elif video_id:
+            await bot.send_video(chat_id=user['telegram_id'], video=video_id)
+        else:
+            await bot.send_message(chat_id=user['telegram_id'], text=text)
 
     text = "Jo'natildi"
     await call.message.answer(text=text, reply_markup=back_menu_keyboard)

@@ -10,7 +10,7 @@ class UsersAdmin(admin.ModelAdmin):
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'full_name', 'department__name', 'filial__name', 'code')
+    list_display = ('id', 'full_name', 'department', 'filial', 'code')
     search_fields = ('full_name', 'department__name', 'filial__name', 'code')
 
 
@@ -28,14 +28,14 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 @admin.register(DepartmentFilial)
 class DepartmentFilialAdmin(admin.ModelAdmin):
-    list_display = ('id', 'filial__name', 'department__name')
+    list_display = ('id', 'filial', 'department')
     search_fields = ('filial__name', 'department_name')
 
 
 @admin.register(Fikr)
 class FikrAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'user__full_name', 'user__phone', 'department__name', 'branch__name', 'employee_code',
+        'id', 'user', 'user', 'department', 'branch', 'employee_code',
         'created_at')
     search_fields = (
         'employee_code', 'user__full_name', 'user__phone', 'department__name', 'branch__name', 'employee_code')
@@ -46,7 +46,7 @@ class FikrAdmin(admin.ModelAdmin):
 
 @admin.register(Promocode)
 class PromocodeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'promocode', 'user__username', 'user__phone', 'created_at')
+    list_display = ('id', 'promocode', 'user', 'user', 'created_at')
     date_hierarchy = 'created_at'
     readonly_fields = ('promocode', 'created_at')
     list_filter = ('created_at',)

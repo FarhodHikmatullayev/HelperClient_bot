@@ -35,9 +35,18 @@ async def get_contact(message: Message):
 async def bot_start(message: types.Message, state: FSMContext):
     print('user_telegram_id', message.from_user.id)
 
-    text = f"Salom, {message.from_user.full_name}!\n"
-    text += "Botimizga xush kelibsiz\n" \
-            "Fikr bildirish uchun kontaktingizni yuboring"
+    users = await db.select_users(telegram_id=message.from_user.id)
+    if not users:
+        text = f"Salom, {message.from_user.full_name}!\n"
+        text += "Botimizga xush kelibsiz\n" \
+                "Fikr bildirish uchun kontaktingizni yuboring"
 
-    await message.answer(text, reply_markup=keyboard)
+        await message.answer(text, reply_markup=keyboard)
+
+    else:
+        text = f"Salom, {message.from_user.full_name}!\n"
+        text += "Botimizga xush kelibsiz\n" \
+                "Fikr bildirish uchun filiallardan birini tanlang"
+        markup = await branches_keyboard()
+        await message.answer(text=text, reply_markup=markup)
     await state.finish()

@@ -6,10 +6,10 @@ from django.db import models
 
 class Users(models.Model):
     id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=100, null=True, blank=True)
-    phone = models.CharField(max_length=13, null=True, blank=True)
-    telegram_id = models.BigIntegerField(unique=True)
-    full_name = models.CharField(max_length=100, null=True, blank=True)
+    username = models.CharField(max_length=100, null=True, blank=True, verbose_name="USERNAME")
+    phone = models.CharField(max_length=13, null=True, blank=True, verbose_name="TELEFON RAQAM")
+    telegram_id = models.BigIntegerField(unique=True, verbose_name="TELEGRAM ID")
+    full_name = models.CharField(max_length=100, null=True, blank=True, verbose_name="F.I.SH")
 
     class Meta:
         db_table = 'users'
@@ -22,7 +22,7 @@ class Users(models.Model):
 
 class Filial(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name="NOMI")
 
     class Meta:
         db_table = 'filial'
@@ -35,7 +35,7 @@ class Filial(models.Model):
 
 class Department(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, verbose_name="NOMI")
 
     class Meta:
         db_table = 'department'
@@ -48,8 +48,8 @@ class Department(models.Model):
 
 class DepartmentFilial(models.Model):
     id = models.AutoField(primary_key=True)
-    department = models.ForeignKey('Department', on_delete=models.CASCADE)
-    filial = models.ForeignKey('Filial', on_delete=models.CASCADE)
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, verbose_name="LAVOZIM")
+    filial = models.ForeignKey('Filial', on_delete=models.CASCADE, verbose_name="FILIAL")
 
     class Meta:
         db_table = 'department_filial'
@@ -62,10 +62,10 @@ class DepartmentFilial(models.Model):
 
 class Employee(models.Model):
     id = models.AutoField(primary_key=True)
-    full_name = models.CharField(max_length=100, null=False)
-    department = models.ForeignKey('Department', on_delete=models.CASCADE)
-    filial = models.ForeignKey('Filial', on_delete=models.CASCADE)
-    code = models.CharField(max_length=3, null=False)
+    full_name = models.CharField(max_length=100, null=False, verbose_name="F.I.SH")
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, verbose_name="LAVOZIM")
+    filial = models.ForeignKey('Filial', on_delete=models.CASCADE, verbose_name="FILIAL")
+    code = models.CharField(max_length=3, null=False, verbose_name="MAXSUS KOD")
 
     class Meta:
         db_table = 'employee'
@@ -95,16 +95,16 @@ class Employee(models.Model):
 
 class Fikr(models.Model):
     id = models.AutoField(primary_key=True)
-    message = models.TextField(null=True)
-    user = models.ForeignKey('Users', on_delete=models.CASCADE, null=True)
+    message = models.TextField(null=True, verbose_name="IZOH")
+    user = models.ForeignKey('Users', on_delete=models.CASCADE, null=True, verbose_name="BAHOLAGAN SHAXS")
     mark = models.IntegerField(null=True, validators=[
         MinValueValidator(1),
         MaxValueValidator(5),
-    ])
-    department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True)
-    employee_code = models.IntegerField(null=True)
-    branch = models.ForeignKey('Filial', on_delete=models.CASCADE, null=True)
-    created_at = models.DateTimeField(default=timezone.now, null=True)
+    ], verbose_name="BAHO")
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True, verbose_name="LAVOZIM")
+    employee_code = models.IntegerField(null=True, verbose_name="XODIM KODI")
+    branch = models.ForeignKey('Filial', on_delete=models.CASCADE, null=True, verbose_name="FILIAL")
+    created_at = models.DateTimeField(default=timezone.now, null=True, verbose_name="BAHOLANGAN VAQT")
 
     class Meta:
         db_table = 'fikr'
@@ -120,9 +120,9 @@ class Fikr(models.Model):
 
 class Promocode(models.Model):
     id = models.AutoField(primary_key=True)
-    promocode = models.CharField(max_length=50, unique=True)
-    user = models.ForeignKey(Users, on_delete=models.CASCADE, null=False)
-    created_at = models.DateTimeField(default=timezone.now, null=True)
+    promocode = models.CharField(max_length=50, unique=True, verbose_name="PROMO KOD")
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, null=False, verbose_name="PROMO KOD EGASI")
+    created_at = models.DateTimeField(default=timezone.now, null=True, verbose_name="YARATILGAN VAQT")
 
     class Meta:
         db_table = 'promocodes'

@@ -35,8 +35,9 @@ print('SECRET_KEY', SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = config('DEBUG', default=False, cast=bool)
-# DEBUG = env.str("DEBUG", "False") == "True"
-DEBUG = True
+DEBUG = env.str("DEBUG", "False") == "True"
+# DEBUG = True
+
 print('debug', DEBUG)
 
 ALLOWED_HOSTS = ['*']

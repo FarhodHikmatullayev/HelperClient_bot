@@ -14,7 +14,9 @@ async def check_markup(branch_id):
                         department_or_employee='employee',
                         branch_id=branch_id
                     )
-                ),
+                )
+            ],
+            [
                 InlineKeyboardButton(
                     text="Mahsulotga",
                     callback_data=department_or_employee_callback_data.new(

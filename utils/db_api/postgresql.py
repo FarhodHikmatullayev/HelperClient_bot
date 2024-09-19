@@ -195,9 +195,9 @@ class Database:
         sql = "INSERT INTO Fikr (message, user_id, mark) VALUES($1) returning *"
         return await self.execute(sql, message, user_id, mark, fetchrow=True)
 
-    async def create_comment_mark(self, department_id, branch_id, employee_code, user_id, mark, created_at, message):
-        sql = "INSERT INTO Fikr (department_id, branch_id, employee_code, user_id, mark, message, created_at) VALUES($1, $2, $3, $4, $5, $6, $7) returning *"
-        return await self.execute(sql, department_id, branch_id, employee_code, user_id, mark, message, created_at,
+    async def create_comment_mark(self, branch_id, employee_code, user_id, mark, created_at, message):
+        sql = "INSERT INTO Fikr (branch_id, employee_code, user_id, mark, message, created_at) VALUES($1, $2, $3, $4, $5, $6) returning *"
+        return await self.execute(sql, branch_id, employee_code, user_id, mark, message, created_at,
                                   fetchrow=True)
 
     async def select_comment(self, user_id, employee_code, department_id, branch_id):

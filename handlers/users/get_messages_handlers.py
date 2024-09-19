@@ -19,33 +19,31 @@ async def back_to_branches(call: CallbackQuery):
     await call.message.edit_text(text="Quyidagi filiallardan birini tanlang", reply_markup=markup)
 
 
+# @dp.callback_query_handler(branch_callback_data.filter())
+# async def set_departments(call: CallbackQuery, callback_data: dict):
+#     branch_id = int(callback_data.get('id'))
+#     department_filial = await db.select_department_filial(filial_id=branch_id)
+#     departments_id = []
+#
+#     for dep_fil in department_filial:
+#         department_id = dep_fil['department_id']
+#         departments_id.append(department_id)
+#     text = "Lavozimlar ro'yxati\n" \
+#            "Baho berish uchun ulardan birini tanlang"
+#     markup = await departments_keyboard(departments_id, branch_id=branch_id)
+#     await call.message.edit_text(text=text, reply_markup=markup)
+
+
 @dp.callback_query_handler(branch_callback_data.filter())
-async def set_departments(call: CallbackQuery, callback_data: dict):
-    branch_id = int(callback_data.get('id'))
-    department_filial = await db.select_department_filial(filial_id=branch_id)
-    departments_id = []
-
-    for dep_fil in department_filial:
-        department_id = dep_fil['department_id']
-        departments_id.append(department_id)
-    text = "Lavozimlar ro'yxati\n" \
-           "Baho berish uchun ulardan birini tanlang"
-    markup = await departments_keyboard(departments_id, branch_id=branch_id)
-    await call.message.edit_text(text=text, reply_markup=markup)
-
-
-@dp.callback_query_handler(department_callback_data.filter())
 async def set_employee_or_department(call: CallbackQuery, callback_data: dict):
-    department_id = int(callback_data.get('id'))
-    branch_id = int(callback_data.get("branch_id"))
-    markup = await check_markup(department_id=department_id, branch_id=branch_id)
+    branch_id = int(callback_data.get('id'))
+    markup = await check_markup(branch_id=branch_id)
     text = "Mahsulotga baho berasizmi yoki xodimga"
     await call.message.edit_text(text=text, reply_markup=markup)
 
 
 @dp.callback_query_handler(department_or_employee_callback_data.filter())
 async def for_employee_or_department(call: CallbackQuery, callback_data: dict, state: FSMContext):
-    department_id = callback_data.get('department_id')
     branch_id = callback_data.get('branch_id')
 
     user_telegram_id = call.from_user.id
@@ -55,7 +53,6 @@ async def for_employee_or_department(call: CallbackQuery, callback_data: dict, s
     await state.update_data(
         {
             'branch_id': branch_id,
-            'department_id': department_id,
             'user_id': user_id
         }
     )
@@ -71,32 +68,50 @@ async def for_employee_or_department(call: CallbackQuery, callback_data: dict, s
 
 @dp.message_handler(state=Mark.employee_id)
 async def get_employee_id(message: Message, state: FSMContext):
+    user_telegram_id = message.from_user.id
+    users = await db.select_user(telegram_id=user_telegram_id)
+    user_id = users[0]['id']
     employee_id = message.text
     data = await state.get_data()
     branch_id = data.get('branch_id')
-    department_id = data.get('department_id')
+    # department_id = data.get('department_id')
 
     try:
         employee_id = int(employee_id)
-        employees = await db.select_employee(code=str(employee_id), filial_id=int(branch_id),
-                                             department_id=int(department_id))
 
-        if employees:
-            # if xodimlar listidan id ni qidirish amali
+        marks = 0
+        if employee_id:
+            marks = await db.select_comments(user_id=user_id, employee_code=employee_id)
 
-            await state.update_data(
-                {
-                    'employee_id': employee_id
-                }
-            )
-            text = "Xodimning ishiga baho bering"
-            await message.answer(text=text, reply_markup=marks_keyboard)
-            await Mark.grade.set()
-        else:
-            text = f"Bu filialda bunday lavozimdagi ID raqami {employee_id} bo'lgan xodim mavjud emas\n" \
-                   f"Iltimos xodimning raqamini tog'ri kiriting\n"
-            await message.answer(text=text)
+        today = datetime.date.today()
+
+        if marks and marks[0]['created_at'].date() == today:
+            mark = marks[0]
+            time = mark['created_at']
+            date = time.date()
+            text = "Siz bugun bu xodim uchun fikr bildirgansiz\n" \
+                   "Boshqa xodimlarga fikr bildirib ko'ring"
             await Mark.employee_id.set()
+            await message.answer(text=text, reply_markup=back_menu_keyboard)
+
+        else:
+            employees = await db.select_employee(code=str(employee_id), filial_id=int(branch_id))
+            if employees:
+                # if xodimlar listidan id ni qidirish amali
+
+                await state.update_data(
+                    {
+                        'employee_id': employee_id
+                    }
+                )
+                text = "Xodimning ishiga baho bering"
+                await message.answer(text=text, reply_markup=marks_keyboard)
+                await Mark.grade.set()
+            else:
+                text = f"Bu filialda ID raqami {employee_id} bo'lgan xodim mavjud emas\n" \
+                       f"Iltimos xodimning raqamini tog'ri kiriting\n"
+                await message.answer(text=text)
+                await Mark.employee_id.set()
 
     except:
         text = "Xodim ID raqamini notog'ri kiritdingiz\n" \
@@ -138,31 +153,22 @@ async def get_comment(message: Message, state: FSMContext):
 
     data = await state.get_data()
     employee_id = data.get('employee_id', None)
-    department_id = int(data.get('department_id'))
+
     comment = data.get('comment')
     grade = data.get('grade')
     user_id = data.get('user_id')
     branch_id = int(data.get('branch_id'))
     branch = await db.select_branch(id=branch_id)
-    department = await db.select_department(id=department_id)
     branch_name = branch['name']
 
-    department_name = department['name']
-
+    text = ""
+    text += f"Filial nomi: {branch_name.capitalize()}\n"
     if employee_id:
-        text = ""
-        text += f"Filial nomi: {branch_name.capitalize()}\n"
-        text += f"Bo'lim nomi: {department_name.capitalize()}\n"
         text += f"Xodim ID raqami: {employee_id}\n"
-        text += f"Siz qo'ygan ball: {grade}\n"
-        text += f"Bu ballni qo'yishingizga sabab: {comment}\n\n"
-        text += "Siz qo'ygan ball quyidagicha bo'ldi\nUni saqlashni xohlaysizmi?"
-    else:
-        text = ""
-        text += f"Bo'lim nomi: {department_name.capitalize()}\n"
-        text += f"Siz qo'ygan ball: {grade}\n"
-        text += f"Bu ballni qo'yishingizga sabab: {comment}\n\n"
-        text += "Siz qo'ygan ball quyidagicha bo'ldi\nUni saqlashni xohlaysizmi?"
+    text += f"Siz qo'ygan ball: {grade}\n"
+    text += f"Bu ballni qo'yishingizga sabab: {comment}\n\n"
+    text += "Siz qo'ygan ball quyidagicha bo'ldi\nUni saqlashni xohlaysizmi?"
+
     await message.answer(text=text, reply_markup=confirm_keyboard)
 
 
@@ -170,29 +176,24 @@ async def get_comment(message: Message, state: FSMContext):
 async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     employee_id = data.get('employee_id', None)
-    department_id = int(data.get('department_id'))
+    # department_id = int(data.get('department_id'))
     comment = data.get('comment')
     grade = int(data.get('grade'))
     user_id = int(data.get('user_id'))
     branch_id = int(data.get('branch_id'))
 
+    marks = 0
     if employee_id:
-        marks = await db.select_comment(user_id=user_id, department_id=department_id, employee_code=employee_id,
-                                        branch_id=branch_id)
-    else:
-        marks = await db.select_fikr_with_null_employee_code(
-            user_id=user_id,
-            department_id=department_id,
-            branch_id=branch_id,
-        )
+        marks = await db.select_comments(user_id=user_id, employee_code=employee_id)
+
     today = datetime.date.today()
 
     if marks and marks[0]['created_at'].date() == today:
         mark = marks[0]
         time = mark['created_at']
         date = time.date()
-        text = "Siz bugun bu obektga fikr bildirgansiz\n" \
-               "Boshqa obektlarga fikr bildirib ko'ring"
+        text = "Siz bugun bu xodim uchun fikr bildirgansiz\n" \
+               "Boshqa xodimlarga fikr bildirib ko'ring"
         await state.finish()
         await call.message.answer(text=text, reply_markup=back_menu_keyboard)
         await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
@@ -200,7 +201,6 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
 
     else:
         mark_comment = await db.create_comment_mark(
-            department_id=department_id,
             branch_id=branch_id,
             employee_code=employee_id,
             user_id=user_id,
@@ -209,16 +209,17 @@ async def confirm_creating_mark(call: CallbackQuery, state: FSMContext):
             created_at=datetime.datetime.now()
         )
         text = "Siz baholash jarayonidan muvaffaqiyatli o'tdingiz"
-        await call.message.edit_text(text=text)
-        promocode = await create_promocode()
-
-        user_promo_code = await db.create_promo_code(promo_code=promocode, user_id=user_id,
-                                                     created_at=datetime.datetime.now())
-
-        text = f"Tabriklaymiz! Siz yordamchi mijoz o'yini ishtirokchisiga aylandingiz\n" \
-               f"Sizning promocodingiz '{promocode}'"
+        # await call.message.edit_text(text=text)
+        # promocode = await create_promocode()
+        #
+        # user_promo_code = await db.create_promo_code(promo_code=promocode, user_id=user_id,
+        #                                              created_at=datetime.datetime.now())
+        #
+        # text = f"Tabriklaymiz! Siz yordamchi mijoz o'yini ishtirokchisiga aylandingiz\n" \
+        #        f"Sizning promocodingiz '{promocode}'"
         await state.finish()
         await call.message.answer(text=text, reply_markup=back_menu_keyboard)
+        await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
 
 
 @dp.callback_query_handler(state=Mark.comment, text='cancel')

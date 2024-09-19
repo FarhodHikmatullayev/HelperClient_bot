@@ -20,40 +20,40 @@ async def download_all_comments_function():
     worksheet = workbook.active
 
     worksheet['A1'] = 'T/r'
-    worksheet['B1'] = 'FULL_NAME'
+    worksheet['B1'] = 'F.I.SH'
     worksheet['C1'] = 'USERNAME'
-    worksheet['D1'] = 'PHONE'
-    worksheet['E1'] = 'TELEGRAM_ID'
+    worksheet['D1'] = 'TELEFON RAQAM'
+    worksheet['E1'] = 'TELEGRAM ID'
     worksheet['F1'] = 'FILIAL NOMI'
-    worksheet['G1'] = 'BO\'LIM NOMI'
-    worksheet['H1'] = 'BAHO'
-    worksheet['I1'] = 'VAQT'
-    worksheet['J1'] = 'FIKR'
+    worksheet['G1'] = 'BAHO'
+    worksheet['H1'] = 'VAQT'
+    worksheet['I1'] = 'FIKR'
 
     worksheet.cell(row=1, column=1, value='№')
-    worksheet.cell(row=1, column=2, value='FULL_NAME')
+    worksheet.cell(row=1, column=2, value='F.I.SH')
     worksheet.cell(row=1, column=3, value="USERNAME")
-    worksheet.cell(row=1, column=4, value='PHONE')
-    worksheet.cell(row=1, column=5, value='TELEGRAM_ID')
+    worksheet.cell(row=1, column=4, value='TELEFON RAQAM')
+    worksheet.cell(row=1, column=5, value='TELEGRAM ID')
     worksheet.cell(row=1, column=6, value='FILIAL NOMI')
-    worksheet.cell(row=1, column=7, value='BO\'LIM NOMI')
-    worksheet.cell(row=1, column=8, value='XODIM ID RAQAMI')
-    worksheet.cell(row=1, column=9, value='BAHO')
-    worksheet.cell(row=1, column=10, value='VAQT')
-    worksheet.cell(row=1, column=11, value='FIKR')
+    worksheet.cell(row=1, column=7, value='XODIM ID RAQAMI')
+    worksheet.cell(row=1, column=8, value='BAHO')
+    worksheet.cell(row=1, column=9, value='VAQT')
+    worksheet.cell(row=1, column=10, value='FIKR')
     tr = 0
     for row, comment in enumerate(comments, start=2):
         filial_id = comment['branch_id']
         department_id = comment['department_id']
+        if department_id:
+            department = await db.select_department(id=department_id)
+            department_name = department['name']
+
         user_id = comment['user_id']
 
         branch = await db.select_branch(id=filial_id)
-        department = await db.select_department(id=department_id)
         users = await db.select_users(id=user_id)
         user = users[0]
 
         branch_name = branch['name']
-        department_name = department['name']
         full_name = user['full_name']
         username = user['username']
         phone = user['phone']
@@ -66,12 +66,11 @@ async def download_all_comments_function():
         worksheet.cell(row=row, column=4, value=phone)
         worksheet.cell(row=row, column=5, value=telegram_id)
         worksheet.cell(row=row, column=6, value=branch_name)
-        worksheet.cell(row=row, column=7, value=department_name)
-        worksheet.cell(row=row, column=8, value=comment['employee_code'])
-        worksheet.cell(row=row, column=9, value=comment['mark'])
-        worksheet.cell(row=row, column=10,
-                       value=(comment['created_at'] + datetime.timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S'))
-        worksheet.cell(row=row, column=11, value=comment['message'])
+        worksheet.cell(row=row, column=7, value=comment['employee_code'])
+        worksheet.cell(row=row, column=8, value=comment['mark'])
+        worksheet.cell(row=row, column=9,
+                       value=(comment['created_at'] + datetime.timedelta(hours=5)).strftime('%d.%m.%Y %H:%M'))
+        worksheet.cell(row=row, column=10, value=comment['message'])
 
     temp_dir = tempfile.gettempdir()
     file_path = os.path.join(temp_dir, 'Comments_data.xlsx')

@@ -44,10 +44,10 @@ class FikrAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 
-@admin.register(Promocode)
-class PromocodeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'promocode', 'user', 'user', 'created_at')
-    date_hierarchy = 'created_at'
-    readonly_fields = ('promocode', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('promocode', 'user_username', 'user__phone')
+# @admin.register(Promocode)
+# class PromocodeAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'promocode', 'user', 'user', 'created_at')
+#     date_hierarchy = 'created_at'
+#     readonly_fields = ('promocode', 'created_at')
+#     list_filter = ('created_at',)
+#     search_fields = ('promocode', 'user_username', 'user__phone')

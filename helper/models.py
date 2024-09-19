@@ -101,7 +101,8 @@ class Fikr(models.Model):
         MinValueValidator(1),
         MaxValueValidator(5),
     ], verbose_name="BAHO")
-    department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True, verbose_name="LAVOZIM")
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True, verbose_name="LAVOZIM",
+                                   blank=True)
     employee_code = models.IntegerField(null=True, verbose_name="XODIM KODI")
     branch = models.ForeignKey('Filial', on_delete=models.CASCADE, null=True, verbose_name="FILIAL")
     created_at = models.DateTimeField(default=timezone.now, null=True, verbose_name="BAHOLANGAN VAQT")
@@ -115,7 +116,7 @@ class Fikr(models.Model):
         verbose_name_plural = "Bildirilgan fikrlar"
 
     def __str__(self):
-        return f"{self.user.full_name} ning {self.branch.name} filiali {self.department.name} lavozimidagi {self.employee_code} ID raqamli xodimga bildirgan fikri"
+        return f"{self.user.full_name} ning {self.branch.name} filiali {self.employee_code} ID raqamli xodimga bildirgan fikri"
 
 
 class Promocode(models.Model):

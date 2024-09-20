@@ -15,7 +15,7 @@ from loader import dp
 @dp.message_handler(content_types='contact')
 async def get_contact(message: Message):
     contact = message.contact
-    print('full_name', message.from_user.full_name)
+    # print('full_name', message.from_user.full_name.encode('utf-8', 'replace').decode('utf-8'))
     try:
         user = await db.create_user(phone=contact.phone_number, telegram_id=message.from_user.id,
                                     username=message.from_user.username, full_name=message.from_user.full_name)

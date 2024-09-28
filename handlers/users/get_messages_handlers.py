@@ -58,7 +58,7 @@ async def for_employee_or_department(call: CallbackQuery, callback_data: dict, s
     )
     if department_employee == 'employee':
         text = 'Xodimning ID raqamini kiriting'
-        await call.message.edit_text(text=text)
+        await call.message.edit_text(text=text, reply_markup=back_menu_keyboard)
         await Mark.employee_id.set()
     elif department_employee == 'department':
         text = 'Mahsulotga baho bering\n'
@@ -110,7 +110,7 @@ async def get_employee_id(message: Message, state: FSMContext):
             else:
                 text = f"Bu filialda ID raqami {employee_id} bo'lgan xodim mavjud emas\n" \
                        f"Iltimos xodimning raqamini tog'ri kiriting\n"
-                await message.answer(text=text)
+                await message.answer(text=text, reply_markup=back_menu_keyboard)
                 await Mark.employee_id.set()
 
     except:

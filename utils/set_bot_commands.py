@@ -9,7 +9,7 @@ async def set_default_commands(dp):
             types.BotCommand("support", "Taklif va mulohazalar uchun"),
             # types.BotCommand("operate_random", "Random funksiyasini ishlatish. Super adminlar uchun"),
             types.BotCommand("download_employees", "Xodimlarni Excel shaklida yuklab olish. Adminlar uchun"),
-            types.BotCommand("upload_employees", "Xodimlarni Excel shaklida botga yuklash. Adminlar uchun"),
+            # types.BotCommand("upload_employees", "Xodimlarni Excel shaklida botga yuklash. Adminlar uchun"),
             # types.BotCommand("download_all_promo_codes", "Promocodlarni yuklab olish. Adminlar uchun"),
             types.BotCommand("download_all_comments", "Mijozlarning fikrlarini yuklab olish. Adminlar uchun"),
         ]

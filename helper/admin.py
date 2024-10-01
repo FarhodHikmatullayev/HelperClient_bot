@@ -35,7 +35,7 @@ class DepartmentFilialAdmin(admin.ModelAdmin):
 @admin.register(Fikr)
 class FikrAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'user', 'user', 'department', 'branch', 'employee_code',
+        'id', 'user', 'department', 'branch', 'employee_code',
         'created_at')
     search_fields = (
         'employee_code', 'user__full_name', 'user__phone', 'department__name', 'branch__name', 'employee_code')

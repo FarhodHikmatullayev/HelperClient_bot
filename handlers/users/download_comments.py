@@ -1,8 +1,6 @@
 import datetime
 import tempfile
-from typing import Union
 
-from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
@@ -20,25 +18,24 @@ async def download_all_comments_function():
     worksheet = workbook.active
 
     worksheet['A1'] = 'T/r'
-    worksheet['B1'] = 'F.I.SH'
-    worksheet['C1'] = 'USERNAME'
-    worksheet['D1'] = 'TELEFON RAQAM'
-    worksheet['E1'] = 'TELEGRAM ID'
-    worksheet['F1'] = 'FILIAL NOMI'
-    worksheet['G1'] = 'BAHO'
-    worksheet['H1'] = 'VAQT'
-    worksheet['I1'] = 'FIKR'
+    worksheet['B1'] = 'BAHOLAGAN SHAXS'
+    worksheet['C1'] = 'FILIAL NOMI'
+    # worksheet['D1'] = 'LAVOZIM'
+    worksheet['D1'] = 'XODIM ID RAQAMI'
+    worksheet['E1'] = 'XODIM ISM FAMILIYASI'
+    worksheet['F1'] = 'BAHO'
+    worksheet['G1'] = 'VAQT'
+    worksheet['H1'] = 'FIKR'
 
     worksheet.cell(row=1, column=1, value='№')
-    worksheet.cell(row=1, column=2, value='F.I.SH')
-    worksheet.cell(row=1, column=3, value="USERNAME")
-    worksheet.cell(row=1, column=4, value='TELEFON RAQAM')
-    worksheet.cell(row=1, column=5, value='TELEGRAM ID')
-    worksheet.cell(row=1, column=6, value='FILIAL NOMI')
-    worksheet.cell(row=1, column=7, value='XODIM ID RAQAMI')
-    worksheet.cell(row=1, column=8, value='BAHO')
-    worksheet.cell(row=1, column=9, value='VAQT')
-    worksheet.cell(row=1, column=10, value='FIKR')
+    worksheet.cell(row=1, column=2, value='BAHOLAGAN SHAXS')
+    worksheet.cell(row=1, column=3, value='FILIAL NOMI')
+    # worksheet.cell(row=1, column=4, value='LAVOZIM')
+    worksheet.cell(row=1, column=4, value='XODIM ID RAQAMI')
+    worksheet.cell(row=1, column=5, value='XODIM ISM FAMILIYASI')
+    worksheet.cell(row=1, column=6, value='BAHO')
+    worksheet.cell(row=1, column=7, value='VAQT')
+    worksheet.cell(row=1, column=8, value='FIKR')
     tr = 0
     for row, comment in enumerate(comments, start=2):
         filial_id = comment['branch_id']
@@ -46,6 +43,8 @@ async def download_all_comments_function():
         if department_id:
             department = await db.select_department(id=department_id)
             department_name = department['name']
+        else:
+            department_name = '-'
 
         user_id = comment['user_id']
 
@@ -58,19 +57,30 @@ async def download_all_comments_function():
         username = user['username']
         phone = user['phone']
         telegram_id = user['telegram_id']
+        code = str(comment['employee_code'])
+        employees = await db.select_employee(code=code)
+        if employees:
+            employee = employees[0]
+            employee_name = employee['full_name']
+        else:
+            employee_name = '-'
+        print('code', code)
+        print('type(code)', type(code))
+        if code == "None":
+            code = '-'
+            print('bajarildi')
 
         tr += 1
         worksheet.cell(row=row, column=1, value=tr)
         worksheet.cell(row=row, column=2, value=full_name)
-        worksheet.cell(row=row, column=3, value=username)
-        worksheet.cell(row=row, column=4, value=phone)
-        worksheet.cell(row=row, column=5, value=telegram_id)
-        worksheet.cell(row=row, column=6, value=branch_name)
-        worksheet.cell(row=row, column=7, value=comment['employee_code'])
-        worksheet.cell(row=row, column=8, value=comment['mark'])
-        worksheet.cell(row=row, column=9,
+        worksheet.cell(row=row, column=3, value=branch_name)
+        # worksheet.cell(row=row, column=4, value=department_name)
+        worksheet.cell(row=row, column=4, value=code)
+        worksheet.cell(row=row, column=5, value=employee_name)
+        worksheet.cell(row=row, column=6, value=comment['mark'])
+        worksheet.cell(row=row, column=7,
                        value=(comment['created_at'] + datetime.timedelta(hours=5)).strftime('%d.%m.%Y %H:%M'))
-        worksheet.cell(row=row, column=10, value=comment['message'])
+        worksheet.cell(row=row, column=8, value=comment['message'])
 
     temp_dir = tempfile.gettempdir()
     file_path = os.path.join(temp_dir, 'Comments_data.xlsx')

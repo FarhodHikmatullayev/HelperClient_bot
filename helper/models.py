@@ -76,22 +76,6 @@ class Employee(models.Model):
         return self.full_name
 
 
-# class Fikr(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     message = models.TextField(null=True)
-#     user = models.ForeignKey('Users', on_delete=models.CASCADE, null=True)
-#     mark = models.IntegerField(null=True, validators=[
-#         MinValueValidator(1),
-#         MaxValueValidator(5),
-#     ])
-#     department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True)
-#     employee_code = models.IntegerField(null=True)
-#     branch = models.ForeignKey('Filial', on_delete=models.CASCADE, null=True)
-#     created_at = models.DateTimeField(default=timezone.now, null=True)
-#
-#     class Meta:
-#         db_table = 'fikr'
-
 
 class Fikr(models.Model):
     id = models.AutoField(primary_key=True)

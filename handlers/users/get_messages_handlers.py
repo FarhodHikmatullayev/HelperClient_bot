@@ -58,7 +58,8 @@ async def for_employee_or_department(call: CallbackQuery, callback_data: dict, s
     )
     if department_employee == 'employee':
         text = 'Xodimning ID raqamini kiriting'
-        await call.message.edit_text(text=text, reply_markup=back_menu_keyboard)
+        await call.message.answer(text=text, reply_markup=back_menu_keyboard)
+        await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
         await Mark.employee_id.set()
     elif department_employee == 'department':
         text = 'Mahsulotga baho bering\n'
